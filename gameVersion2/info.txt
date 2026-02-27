@@ -1,0 +1,1 @@
+This is the same "second.py" game, but files have been segregated for convinence and clean structure in this directory.
