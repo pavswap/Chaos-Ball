@@ -70,6 +70,28 @@ class Game:
         # Gravity announcement
         self.gravity_announce_timer = 0.0
         self.gravity_announce_text  = ""
+
+        # Sound effects
+        self.sounds = {
+            "jump":       pygame.mixer.Sound("assets/sounds/jump.wav"),
+            "shoot":      pygame.mixer.Sound("assets/sounds/shoot.wav"),
+            "coin":       pygame.mixer.Sound("assets/sounds/coin.wav"),
+            "respawn":    pygame.mixer.Sound("assets/sounds/respawn.wav"),
+            "hit":        pygame.mixer.Sound("assets/sounds/hit.wav"),
+            "level_clear":pygame.mixer.Sound("assets/sounds/level_clear.wav"),
+            "boost":      pygame.mixer.Sound("assets/sounds/boost.wav"),
+            "enemy_hit":  pygame.mixer.Sound("assets/sounds/enemy_hit.wav"),
+        }
+        # Set volume for each sound (optional)
+        self.sounds["jump"].set_volume(0.3)
+        self.sounds["shoot"].set_volume(0.2)
+        self.sounds["coin"].set_volume(0.4)
+        self.sounds["respawn"].set_volume(0.5)
+        self.sounds["hit"].set_volume(0.3)
+        self.sounds["level_clear"].set_volume(0.5)
+        self.sounds["boost"].set_volume(0.4)
+        self.sounds["enemy_hit"].set_volume(0.3)
+
         self.load_level()
 
     def start_at(self, level_idx):
@@ -244,6 +266,7 @@ class Game:
                              ndx * GUN_PROJ_SPEED,
                              ndy * GUN_PROJ_SPEED))
         self._shoot_timer = _SHOOT_COOLDOWN
+        self.sounds["shoot"].play()
         # Muzzle-flash particles
         for _ in range(8):
             p = Particle(self.bx, self.by, (255, 255, 100))
@@ -257,6 +280,7 @@ class Game:
             self.bvy        -= gy * 700
             self.jumps_left -= 1
             self.on_ground   = False
+            self.sounds["jump"].play()
             if self.jumps_left == 0:   # second jump – puff effect
                 for _ in range(18):
                     p = Particle(self.bx, self.by, (150, 200, 255))
@@ -531,6 +555,7 @@ class Game:
                 self.coin_combo_timer = 1.5   # reset combo window
                 points = 10 * self.coin_combo   # 10, 20, 30 ... per combo chain
                 self.score += points
+                self.sounds["coin"].play()
                 # Visual burst
                 gold = (255, 220, 40)
                 for _ in range(16):

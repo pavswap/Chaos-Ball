@@ -15,6 +15,7 @@ from menu import Menu
 
 def main():
     screen = pygame.display.set_mode((SW, SH))
+    pygame.mixer.init()
     pygame.display.set_caption("CHAOS BALL")
     clock    = pygame.time.Clock()
     game     = Game()
