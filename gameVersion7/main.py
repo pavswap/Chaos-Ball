@@ -6,6 +6,7 @@ main.py  –  Entry point for CHAOS BALL.
 Requirements:  pip install pygame
 """
 
+import warnings
 import pygame
 from settings import SW, SH, FPS
 from game import Game
@@ -15,7 +16,12 @@ from menu import Menu
 
 def main():
     screen = pygame.display.set_mode((SW, SH))
-    pygame.mixer.init()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            pygame.mixer.init()
+        except Exception:
+            pass
     pygame.display.set_caption("CHAOS BALL")
     clock    = pygame.time.Clock()
     game     = Game()
@@ -44,7 +50,7 @@ def main():
 
             # Allow returning to menu with M when the game is in an end state
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_m] and game.state in ("game_over","win","level_clear"):
+            if keys[pygame.K_m] and game.state in ("game_over","win","level_clear","pause"):
                 back_to_menu = True
 
 

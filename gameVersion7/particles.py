@@ -3,7 +3,7 @@ particles.py
 ------------
 Visual effect classes:
   - Particle  : a single burst particle (position, velocity, fade)
-  - Flash     : a full-screen colour overlay that fades out
+  - Flash     : a full-screen colour overlay that fades out (surface cached)
 """
 
 import math
@@ -49,10 +49,14 @@ class Particle:
         return self.life > 0
 
 
+# Shared overlay surface for Flash (avoids allocating a new one every frame)
+_flash_overlay = None
+
+
 class Flash:
     """
     A full-screen translucent colour overlay that fades out over *duration*
-    seconds.  Useful for death flashes, level-clear flashes, etc.
+    seconds.  Reuses a single shared surface to avoid per-frame allocation.
     """
 
     def __init__(self, color: tuple, duration: float = 0.3) -> None:
@@ -64,10 +68,13 @@ class Flash:
         self.timer -= dt
 
     def draw(self, surf: pygame.Surface) -> None:
-        alpha   = max(0.0, self.timer / self.duration)
-        overlay = pygame.Surface((SW, SH), pygame.SRCALPHA)
-        overlay.fill((*self.color, int(120 * alpha)))
-        surf.blit(overlay, (0, 0))
+        global _flash_overlay
+        if _flash_overlay is None or _flash_overlay.get_size() != (SW, SH):
+            _flash_overlay = pygame.Surface((SW, SH), pygame.SRCALPHA)
+
+        alpha = max(0.0, self.timer / self.duration)
+        _flash_overlay.fill((*self.color, int(120 * alpha)))
+        surf.blit(_flash_overlay, (0, 0))
 
     @property
     def done(self) -> bool:

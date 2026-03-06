@@ -14,8 +14,10 @@ from renderer import _make_font
 _TIERS = [
     (0,               TIER_BASIC_END,    "BASIC",    (70,180,255)),
     (TIER_BASIC_END,  TIER_SPINNER_END,  "SPINNERS", (255,160, 40)),
-    (TIER_SPINNER_END,TIER_SHOOTER_START,"VOID",     ( 80,  0,180)),
-    (TIER_SHOOTER_START, NUM_LEVELS,     "HAUNTED",  (200, 80,255)),
+    (TIER_SPINNER_END, 14,               "VOID",     ( 80,  0,180)),
+    (14,              TIER_SHOOTER_START, "ARMED",    (255,220, 50)),
+    (TIER_SHOOTER_START, 18,             "HAUNTED",  (200, 80,255)),
+    (18,              NUM_LEVELS,         "SIEGE",    (255, 50, 50)),
 ]
 
 def _tier_for(idx):
@@ -382,10 +384,10 @@ class Menu:
 
             # Feature icons under number
             icons=[]
-            if idx>=TIER_SPINNER_END: icons.append("🌀")
-            if idx>=TIER_SPINNER_END: icons.append("🔫")
-            if idx>=TIER_SHOOTER_START: icons.append("👻")
-            if idx>=TIER_SHOOTER_START: icons.append("🔴")
+            if idx>=TIER_SPINNER_END: icons.append("P")  # portal
+            if idx>=14: icons.append("G")  # gun
+            if idx>=TIER_SHOOTER_START: icons.append("E")  # enemies
+            if idx>=18: icons.append("T")  # turrets
             if icons:
                 ics=self.font_xs.render(" ".join(icons),True,(180,180,200))
                 self.screen.blit(ics,(rect.centerx-ics.get_width()//2,

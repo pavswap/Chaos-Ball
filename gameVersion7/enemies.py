@@ -467,7 +467,8 @@ class VoidWall:
 def _draw_portal_label(surf, arrow, cx, cy, pulse, flash):
     """Draw a small pulsing arrow label on a portal edge."""
     try:
-        font = pygame.font.SysFont("consolas", 16, bold=True)
+        from renderer import _make_font
+        font = _make_font("consolas", 16, bold=True)
         a_val = int(180 + 75 * pulse + 75 * flash)
         a_val = min(255, a_val)
         txt = font.render(arrow, True, (220, 180, 255))

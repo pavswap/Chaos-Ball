@@ -50,14 +50,16 @@ PALETTE = {
 # ---------------------------------------------------------------------------
 NUM_LEVELS: int = 20
 
-#  L01-08  BASIC     – platforms + spikes
-#  L09-12  SPINNERS  – + rotating obstacles (up to 3)
-#  L13-20  VOID      – + secret void walls + player gun (3 shots/level)
-#  L17-20  HAUNTED+  – void tier also gains flying ghosts + shooting turrets
+#  L01-08  BASIC     -- platforms + spikes
+#  L09-12  SPINNERS  -- + rotating obstacles
+#  L13-14  VOID      -- + void wall portals (introduction)
+#  L15-16  ARMED     -- + player gun (learn to shoot)
+#  L17-18  HAUNTED   -- + flying ghosts
+#  L19-20  SIEGE     -- + shooting turrets (all mechanics combined)
 TIER_BASIC_END:    int =  8   # exclusive upper bound
 TIER_SPINNER_END:  int = 12
-TIER_VOID_END:     int = 20   # L13-20: void walls active; gun unlocked
-TIER_SHOOTER_START: int = 16  # L17-20: shooting turrets + flying enemies added
+TIER_VOID_END:     int = 20   # L13-20: void walls active
+TIER_SHOOTER_START: int = 16  # L17+: ghosts; L19+: turrets
 
 # ---------------------------------------------------------------------------
 # Canvas (normalised 1920×1080 design space)
@@ -79,3 +81,31 @@ SPAWN_SAFE_R: int = 180
 GUN_AMMO_PER_LEVEL: int = 3
 GUN_PROJ_SPEED:     int = 900   # px/s screen-space
 GUN_PROJ_RADIUS:    int = 7
+
+# ---------------------------------------------------------------------------
+# Dash
+# ---------------------------------------------------------------------------
+DASH_SPEED:    float = 1400.0
+DASH_DURATION: float = 0.12
+DASH_COOLDOWN: float = 1.5
+
+# ---------------------------------------------------------------------------
+# Invincibility after respawn
+# ---------------------------------------------------------------------------
+INVINCIBLE_DURATION: float = 1.5
+
+# ---------------------------------------------------------------------------
+# Coyote time / jump buffer  (platformer feel polish)
+# ---------------------------------------------------------------------------
+COYOTE_TIME: float = 0.10
+JUMP_BUFFER_TIME: float = 0.12
+
+# ---------------------------------------------------------------------------
+# Death freeze frame
+# ---------------------------------------------------------------------------
+DEATH_FREEZE_TIME: float = 0.20
+
+# ---------------------------------------------------------------------------
+# Kill combo
+# ---------------------------------------------------------------------------
+KILL_COMBO_WINDOW: float = 2.5
