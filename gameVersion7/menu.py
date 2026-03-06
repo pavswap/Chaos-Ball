@@ -7,6 +7,7 @@ Returns ("play", level_idx) or "quit" from Menu.run().
 import math
 import pygame
 from settings import SW, SH, NUM_LEVELS, PALETTE, TIER_BASIC_END, TIER_SPINNER_END, TIER_SHOOTER_START
+from renderer import _make_font
 
 
 # Tier appearance config used by the level grid
@@ -30,14 +31,15 @@ class Menu:
     def __init__(self, screen, clock):
         self.screen = screen
         self.clock  = clock
-        self.font_xl  = pygame.font.SysFont("consolas", 96, bold=True)
-        self.font_big = pygame.font.SysFont("consolas", 52, bold=True)
-        self.font_med = pygame.font.SysFont("consolas", 32, bold=True)
-        self.font_sm  = pygame.font.SysFont("consolas", 22)
-        self.font_xs  = pygame.font.SysFont("consolas", 16)
+        self.font_xl  = _make_font("consolas", 96, bold=True)
+        self.font_big = _make_font("consolas", 52, bold=True)
+        self.font_med = _make_font("consolas", 32, bold=True)
+        self.font_sm  = _make_font("consolas", 22)
+        self.font_xs  = _make_font("consolas", 16)
         self._state   = "main"
         self._hovered = 0
         self._time    = 0.0
+        self._slide   = 0
 
     # ────────────────────────────────────────────────────── public api ──
 
@@ -50,6 +52,8 @@ class Menu:
                 return result
             if self._state == "main":
                 self._draw_main()
+            elif self._state == "tutorial":
+                self._draw_tutorial()
             else:
                 self._draw_select()
             pygame.display.flip()
@@ -62,10 +66,12 @@ class Menu:
                 return "quit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if self._state == "select": self._state = "main"
+                    if self._state in ("select", "tutorial"): self._state = "main"
                     else: return "quit"
                 if self._state == "main":
                     r = self._handle_main_key(event.key)
+                elif self._state == "tutorial":
+                    r = self._handle_tutorial_key(event.key)
                 else:
                     r = self._handle_select_key(event.key)
                 if r is not None: return r
@@ -78,7 +84,7 @@ class Menu:
 
     # main menu keyboard
     def _handle_main_key(self, key):
-        n = 3
+        n = 4
         if key in (pygame.K_UP, pygame.K_w):
             self._hovered = (self._hovered-1) % n
         elif key in (pygame.K_DOWN, pygame.K_s):
@@ -90,7 +96,16 @@ class Menu:
     def _main_choose(self, idx):
         if idx == 0: return ("play", 0)
         if idx == 1: self._state="select"; self._hovered=0; return None
+        if idx == 2: self._state="tutorial"; self._slide=0; return None
         return "quit"
+
+    # tutorial keyboard
+    def _handle_tutorial_key(self, key):
+        if key in (pygame.K_RIGHT, pygame.K_d):
+            self._slide = min(5, self._slide + 1)
+        elif key in (pygame.K_LEFT, pygame.K_a):
+            self._slide = max(0, self._slide - 1)
+        return None
 
     # level select keyboard
     def _handle_select_key(self, key):
@@ -103,17 +118,32 @@ class Menu:
         return None
 
     def _handle_hover(self, pos):
-        if self._state=="main":
-            for i in range(3):
+        if self._state == "main":
+            for i in range(4):
                 if self._btn_rect(i).collidepoint(pos): self._hovered=i
+        elif self._state == "tutorial":
+            bx,by,bw,bh=self._back_rect()
+            if bx<=pos[0]<=bx+bw and by<=pos[1]<=by+bh:
+                self._state="main"
         else:
             t=self._tile_at(pos)
             if t is not None: self._hovered=t
 
     def _handle_click(self, pos):
         if self._state=="main":
-            for i in range(3):
+            for i in range(4):
                 if self._btn_rect(i).collidepoint(pos): return self._main_choose(i)
+        elif self._state=="tutorial":
+            bx,by,bw,bh=self._back_rect()
+            if bx<=pos[0]<=bx+bw and by<=pos[1]<=by+bh:
+                self._state="main"
+                return None
+            next_rx, next_ry, next_rw, next_rh = self._next_rect()
+            prev_rx, prev_ry, prev_rw, prev_rh = self._prev_rect()
+            if next_rx <= pos[0] <= next_rx + next_rw and next_ry <= pos[1] <= next_ry + next_rh:
+                self._slide = min(5, self._slide + 1)
+            if prev_rx <= pos[0] <= prev_rx + prev_rw and prev_ry <= pos[1] <= prev_ry + prev_rh:
+                self._slide = max(0, self._slide - 1)
         else:
             t=self._tile_at(pos)
             if t is not None: return ("play",t)
@@ -159,8 +189,8 @@ class Menu:
             self.screen.blit(blk,(tx2,ty+130)); tx2+=blk.get_width()+30
 
         # Buttons
-        labels = ["PLAY",  "LEVEL SELECT",  "QUIT"]
-        colors = [(50,255,150),(70,180,255),(255,80,100)]
+        labels = ["PLAY",  "LEVEL SELECT", "HOW TO PLAY", "QUIT"]
+        colors = [(50,255,150),(70,180,255),(255,160,40),(255,80,100)]
         for i,(lbl,col) in enumerate(zip(labels,colors)):
             rect  = self._btn_rect(i)
             hov   = i==self._hovered
@@ -177,6 +207,134 @@ class Menu:
             "↑↓ / Mouse to navigate  ·  ENTER to select  ·  ESC to quit",
             True,(70,70,100))
         self.screen.blit(hint,(SW//2-hint.get_width()//2, SH-40))
+
+    def _draw_tutorial(self):
+        self.screen.fill((6, 6, 20))
+        title = self.font_big.render("HOW TO PLAY", True, PALETTE["text"])
+        self.screen.blit(title, (SW // 2 - title.get_width() // 2, 26))
+
+        slides = [
+            # Slide 1
+            [
+                "Chaos Ball: Beginner's Guide",
+                "",
+                "Die to change gravity, survive the chaos,",
+                "and conquer 20 levels of madness!"
+            ],
+            # Slide 2
+            [
+                "What is this game?",
+                "",
+                "Chaos Ball is a fast-paced, unpredictable 2D platformer",
+                "where you control a bouncy ball trying to reach the",
+                "level's goal portal. The major twist is the",
+                "'chaos respawn' system—every time you die, gravity",
+                "randomly shifts direction (up, down, left, or right) and",
+                "the edge walls might suddenly become deadly. You'll need",
+                "quick reflexes to adapt to your new reality and survive",
+                "through 20 challenging levels filled with spikes,",
+                "moving obstacles, and enemies!"
+            ],
+            # Slide 3
+            [
+                "Getting Started",
+                "",
+                "1. Install Prerequisites: Open your terminal/command prompt",
+                "   and run `pip install pygame`.",
+                "2. Launch the Game: In the game's folder, run `python main.py`",
+                "   in your terminal.",
+                "3. Navigate the Menu: Use your Arrow Keys or Mouse to navigate",
+                "   the main menu.",
+                "4. Begin the Chaos: Select 'PLAY' and press ENTER to drop",
+                "   right into Level 1!"
+            ],
+            # Slide 4
+            [
+                "Core Controls & Mechanics",
+                "",
+                "* Move: Use WASD or Arrow Keys to roll around.",
+                "* Jump: Press Spacebar (or the 'Up' key relative to current gravity).",
+                "  You have a Double Jump, meaning you can jump twice before needing",
+                "  to land!",
+                "* Dash: Press Left Shift or Right Shift to perform a quick dash.",
+                "* Shoot: Left Mouse Click to fire your gun toward your mouse",
+                "  cursor (Unlocks in later levels!).",
+                "* Pause / Restart: Press P to pause the game, or R to quickly",
+                "  restart if you get a Game Over."
+            ],
+            # Slide 5
+            [
+                "Your First Goal",
+                "",
+                "For your first play session, simply focus on completing the BASIC",
+                "Tier (Levels 1-8). Don't worry about getting high scores or",
+                "speedrunning! Just get comfortable with timing your double jumps",
+                "to cross gaps, and practice adapting your brain to the new",
+                "movement controls every time the gravity direction shifts."
+            ],
+            # Slide 6
+            [
+                "Pro Tip + Common Mistake",
+                "",
+                "* Pro Tip: Your double jump only recharges when you touch the",
+                "  specific surface that gravity is pulling you toward! Don't",
+                "  expect your jumps to come back just because you bumped into",
+                "  a random side-wall.",
+                "* Common Mistake: Panicking immediately after respawning! When",
+                "  you lose a life, there is a brief 'death freeze.' Beginners",
+                "  often hold down movement keys and instantly launch themselves",
+                "  into spikes because the gravity just changed to a new",
+                "  direction. Take a second to read the on-screen 'GRAVITY:'",
+                "  announcement before moving!"
+            ]
+        ]
+
+        ty = 120
+        for line in slides[self._slide]:
+            if line:
+                s = self.font_med.render(line, True, (200, 200, 220))
+                self.screen.blit(s, (SW // 2 - s.get_width() // 2, ty))
+            ty += 40
+
+        # Back button
+        bx, by, bw2, bh2 = self._back_rect()
+        brect = pygame.Rect(bx, by, bw2, bh2)
+        pygame.draw.rect(self.screen, (35, 25, 55), brect, border_radius=8)
+        pygame.draw.rect(self.screen, (110, 70, 170), brect, 2, border_radius=8)
+        btxt = self.font_med.render("← BACK", True, (180, 130, 255))
+        self.screen.blit(btxt, (bx + bw2 // 2 - btxt.get_width() // 2,
+                                by + bh2 // 2 - btxt.get_height() // 2))
+
+        # Prev button
+        prx, pry, prw, prh = self._prev_rect()
+        prect = pygame.Rect(prx, pry, prw, prh)
+        col = (110, 70, 170) if self._slide > 0 else (50, 50, 50)
+        pygame.draw.rect(self.screen, (35, 25, 55), prect, border_radius=8)
+        pygame.draw.rect(self.screen, col, prect, 2, border_radius=8)
+        ptxt = self.font_med.render("PREV", True, col)
+        self.screen.blit(ptxt, (prx + prw // 2 - ptxt.get_width() // 2,
+                                pry + prh // 2 - ptxt.get_height() // 2))
+
+        # Next button
+        nrx, nry, nrw, nrh = self._next_rect()
+        nrect = pygame.Rect(nrx, nry, nrw, nrh)
+        col = (110, 70, 170) if self._slide < 5 else (50, 50, 50)
+        pygame.draw.rect(self.screen, (35, 25, 55), nrect, border_radius=8)
+        pygame.draw.rect(self.screen, col, nrect, 2, border_radius=8)
+        ntxt = self.font_med.render("NEXT", True, col)
+        self.screen.blit(ntxt, (nrx + nrw // 2 - ntxt.get_width() // 2,
+                                nry + nrh // 2 - ntxt.get_height() // 2))
+
+        hint = self.font_sm.render(
+            f"Slide {self._slide + 1}/6  ·  Arrows/Mouse: navigate  ·  ESC: back",
+            True, (70, 70, 100))
+        self.screen.blit(hint, (SW // 2 - hint.get_width() // 2, SH - 36))
+
+    def _next_rect(self):
+        return (SW - 210, SH - 76, 160, 46)
+
+    def _prev_rect(self):
+        return (SW - 400, SH - 76, 160, 46)
 
     def _btn_rect(self, idx):
         bw,bh=400,70
