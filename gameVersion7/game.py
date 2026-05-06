@@ -61,15 +61,15 @@ class Game:
 
     def _init_sounds(self):
         self.sounds = {
-            "jump":       _load_sound("assets/sounds/jump.wav"),
-            "shoot":      _load_sound("assets/sounds/shoot.wav"),
-            "coin":       _load_sound("assets/sounds/coin.wav"),
-            "respawn":    _load_sound("assets/sounds/respawn.wav"),
-            "hit":        _load_sound("assets/sounds/hit.wav"),
-            "level_clear":_load_sound("assets/sounds/level_clear.wav"),
-            "boost":      _load_sound("assets/sounds/boost.wav"),
-            "enemy_hit":  _load_sound("assets/sounds/enemy_hit.wav"),
-            "dash":       _load_sound("assets/sounds/dash.wav"),
+            "jump":       _load_sound("assets/sounds/Retro/jump.wav"),
+            "shoot":      _load_sound("assets/sounds/Retro/throw.wav"),
+            "coin":       _load_sound("assets/sounds/Retro/coin.wav"),
+            "respawn":    _load_sound("assets/sounds/Retro/power_up.wav"),
+            "hit":        _load_sound("assets/sounds/Retro/hurt.wav"),
+            "level_clear":_load_sound("assets/sounds/Musical Effects/8_bit_level_complete.wav"),
+            "boost":      _load_sound("assets/sounds/Other/whoosh_1.wav"),
+            "enemy_hit":  _load_sound("assets/sounds/Retro/explosion_quick.wav"),
+            "dash":       _load_sound("assets/sounds/Other/whoosh_2.wav"),
         }
         self.sounds["jump"].set_volume(0.3)
         self.sounds["shoot"].set_volume(0.2)
