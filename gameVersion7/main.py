@@ -30,7 +30,7 @@ def main():
     # Background Music
     pygame.init()
     pygame.mixer.init()
-    pygame.mixer.music.load("resources/chaosball.wav")
+    pygame.mixer.music.load("resources/chaosball.ogg")
     #(-1 means loop forever)
     pygame.mixer.music.play(-1)
 
