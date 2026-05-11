@@ -27,6 +27,13 @@ def main():
     game     = Game()
     renderer = Renderer(screen)
 
+    # Background Music
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load("resources/chaosball.wav")
+    #(-1 means loop forever)
+    pygame.mixer.music.play(-1)
+
     while True:
         # ── Main / level-select menu ────────────────────────────────────
         menu   = Menu(screen, clock)
