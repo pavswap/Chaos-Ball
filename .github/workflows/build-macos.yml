@@ -27,4 +27,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ChaosBall-macOS
-          path: gameVersion8/dist
+          path: gameVersion8/dist/ChaosBall.app
