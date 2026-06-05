@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+build/
+dist/
+.gradle/
+.idea/
+local.properties
+*.apk
+*.exe
+build/
+dist/
+*.apk
+*.exe
+ChaosBallAndroid/app/build/
+ChaosBallAndroid/.gradle/
+ChaosBallAndroid/.idea/
